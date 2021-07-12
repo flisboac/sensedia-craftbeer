@@ -14,5 +14,13 @@ services:
       POSTGRES_USER: ${APP_DB_ADMIN_USER}
       POSTGRES_PASSWORD: ${APP_DB_ADMIN_PASS}
 
+  app:
+    image: craftbeer:latest
+    build: .
+    env_file: .env
+    ports:
+      - ${APP_PORT:-9000}:${APP_PORT:-9000}
+
 volumes:
   db_data:
+  app_m2:

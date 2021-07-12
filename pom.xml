@@ -25,19 +25,11 @@
         <!-- Servlet config -->
         <app.context-path>/</app.context-path>
 
-        <!-- Database: localhost-only config -->
-        <!-- (Used to generate the localhost-only development database) -->
-        <app.db.admin.user>craftbeer_admin</app.db.admin.user>
-        <app.db.admin.pass>lightbeerisbest</app.db.admin.pass>
-        <app.db.host>localhost</app.db.host>
-        <app.db.port>5432</app.db.port>
-        <app.db.name>craftbeer</app.db.name>
-
         <!-- Database: connection config -->
         <app.db.platform>postgresql</app.db.platform>
-        <app.db.user>craftbeer</app.db.user>
-        <app.db.pass>ipaisnotgoodfightme</app.db.pass>
-        <app.db.url>jdbc:postgresql://${app.db.host}:${app.db.port}/${app.db.name}</app.db.url>
+        <app.db.user />
+        <app.db.pass />
+        <app.db.url />
     </properties>
 
     <parent>
@@ -86,14 +78,7 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -115,26 +100,11 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-dotenvs</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/etc/samples</directory>
-                                    <targetPath>${project.basedir}</targetPath>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.beerhouse.Application</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -142,6 +112,21 @@
     <profiles>
         <profile>
             <id>dev</id>
+            <properties>
+                <!-- Database: localhost-only config -->
+                <!-- (Used to generate the localhost-only development database) -->
+                <app.db.admin.user>craftbeer_admin</app.db.admin.user>
+                <app.db.admin.pass>lightbeerisbest</app.db.admin.pass>
+                <app.db.host>localhost</app.db.host>
+                <app.db.port>5432</app.db.port>
+                <app.db.name>craftbeer</app.db.name>
+
+                <!-- Database: connection config -->
+                <app.db.platform>postgresql</app.db.platform>
+                <app.db.user>craftbeer</app.db.user>
+                <app.db.pass>ipaisnotgoodfightme</app.db.pass>
+                <app.db.url>jdbc:postgresql://${app.db.host}:${app.db.port}/${app.db.name}</app.db.url>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
@@ -152,12 +137,34 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>generate-dotenvs</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>resources</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.basedir}/etc/samples</directory>
+                                            <targetPath>${project.basedir}</targetPath>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>io.brachu</groupId>
                         <artifactId>docker-compose-maven-plugin</artifactId>
                         <version>${maven.docker-compose-plugin.version}</version>
                         <configuration>
                             <file>${project.basedir}/docker-compose.yml</file>
-                            <projectName>craftbeer</projectName>
+                            <projectName>${project.artifactId}</projectName>
                             <startServices>
                                 <service>db</service>
                             </startServices>
