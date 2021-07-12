@@ -1,0 +1,282 @@
+{
+	"info": {
+		"_postman_id": "e4f98e69-5e00-463b-a08e-d1f53cc90229",
+		"name": "craftbeer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "beers",
+			"item": [
+				{
+					"name": "collection: list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"listBeers: succeeds\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"listBeers: returns an array\", function () {",
+									"    pm.response.to.have.jsonBody();",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(Array.isArray(jsonData)).to.be.true;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BEER_API_BASE_URL}}/beers",
+							"host": [
+								"{{BEER_API_BASE_URL}}"
+							],
+							"path": [
+								"beers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "collection: create one",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"createBeer: succeeds\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"createBeer: has Location header\", function () {",
+									"    pm.response.to.have.header('Location');",
+									"    setBeerId();",
+									"});",
+									"",
+									"function setBeerId() {",
+									"    var url = pm.response.headers.get('Location');",
+									"    var beerId = url.split('/').pop();",
+									"    pm.collectionVariables.set(\"BEER_ID\", beerId);",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Brahma Chopp (Long Neck, 600ml)\",\n    \"price\": 2.99,\n    \"alcoholContent\": \"4,8%\",\n    \"category\": \"American Lager\",\n    \"ingredients\": \"Água, malte, milho e lúpulo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BEER_API_BASE_URL}}/beers",
+							"host": [
+								"{{BEER_API_BASE_URL}}"
+							],
+							"path": [
+								"beers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "single: get",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"getBeer: either succeeds or fails\", function () {",
+									"    var httpStatus = pm.response.code;",
+									"    pm.expect([200, 404]).to.include(httpStatus);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BEER_API_BASE_URL}}/beers/{{BEER_ID}}",
+							"host": [
+								"{{BEER_API_BASE_URL}}"
+							],
+							"path": [
+								"beers",
+								"{{BEER_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "single: update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"updateBeer: either succeeds or fails\", function () {",
+									"    var httpStatus = pm.response.code;",
+									"    pm.expect([200, 404]).to.include(httpStatus);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 3.99\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BEER_API_BASE_URL}}/beers/{{BEER_ID}}",
+							"host": [
+								"{{BEER_API_BASE_URL}}"
+							],
+							"path": [
+								"beers",
+								"{{BEER_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "single: replace",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"replaceBeer: either succeeds or fails\", function () {",
+									"    var httpStatus = pm.response.code;",
+									"    pm.expect([200, 404]).to.include(httpStatus);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Brahma Chopp (Long Neck, 600ml)\",\n    \"price\": 4.99,\n    \"alcoholContent\": \"5,1%\",\n    \"category\": \"American Lager\",\n    \"ingredients\": \"Água, malte, milho e lúpulo.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BEER_API_BASE_URL}}/beers/{{BEER_ID}}",
+							"host": [
+								"{{BEER_API_BASE_URL}}"
+							],
+							"path": [
+								"beers",
+								"{{BEER_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "single: remove",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"removeBeer: either succeeds or fails\", function () {",
+									"    var httpStatus = pm.response.code;",
+									"    pm.expect([204, 404]).to.include(httpStatus);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BEER_API_BASE_URL}}/beers/{{BEER_ID}}",
+							"host": [
+								"{{BEER_API_BASE_URL}}"
+							],
+							"path": [
+								"beers",
+								"{{BEER_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BEER_ID",
+			"value": "0"
+		},
+		{
+			"key": "BEER_API_BASE_URL",
+			"value": "http://localhost:9000"
+		}
+	]
+}

@@ -11,22 +11,46 @@
     <name>Craft Beer</name>
     <description>Manage craft beers</description>
 
+    <properties>
+        <!-- Library dependencies: versions -->
+        <java.version>11</java.version>
+        <m2e.apt.activation>jdt_apt</m2e.apt.activation>
+        <h2.version>1.4.197</h2.version>
+        <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <postgresql-jdbc.version>42.2.23</postgresql-jdbc.version>
+
+        <!-- Maven Plugin dependencies: versions -->
+        <maven.docker-compose-plugin.version>0.9.0</maven.docker-compose-plugin.version>
+
+        <!-- Servlet config -->
+        <app.context-path>/</app.context-path>
+
+        <!-- Database: localhost-only config -->
+        <!-- (Used to generate the localhost-only development database) -->
+        <app.db.admin.user>craftbeer_admin</app.db.admin.user>
+        <app.db.admin.pass>lightbeerisbest</app.db.admin.pass>
+        <app.db.host>localhost</app.db.host>
+        <app.db.port>5432</app.db.port>
+        <app.db.name>craftbeer</app.db.name>
+
+        <!-- Database: connection config -->
+        <app.db.platform>postgresql</app.db.platform>
+        <app.db.user>craftbeer</app.db.user>
+        <app.db.pass>ipaisnotgoodfightme</app.db.pass>
+        <app.db.url>jdbc:postgresql://${app.db.host}:${app.db.port}/${app.db.name}</app.db.url>
+    </properties>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <!-- Será que essa versão está atualizada? Melhor checar :)  -->
-        <version>2.4.2</version>
+        <version>2.5.2</version>
     </parent>
 
-    <properties>
-        <!-- Posso utilizar java 9, 10, 11...? Claro!  -->
-        <java.version>8</java.version>
-    </properties>
     <dependencies>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -36,17 +60,119 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql-jdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
-
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgs>
+                        <arg>-Amapstruct.defaultComponentModel=spring</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-dotenvs</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/etc/samples</directory>
+                                    <targetPath>${project.basedir}</targetPath>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.brachu</groupId>
+                        <artifactId>docker-compose-maven-plugin</artifactId>
+                        <version>${maven.docker-compose-plugin.version}</version>
+                        <configuration>
+                            <file>${project.basedir}/docker-compose.yml</file>
+                            <projectName>craftbeer</projectName>
+                            <startServices>
+                                <service>db</service>
+                            </startServices>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>up</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
